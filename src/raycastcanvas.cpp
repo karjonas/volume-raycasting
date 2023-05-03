@@ -51,6 +51,10 @@ RayCastCanvas::RayCastCanvas(QWidget *parent)
     m_modes["Isosurface"] = [&]() { RayCastCanvas::raycasting("Isosurface"); };
     m_modes["Alpha blending"] = [&]() { RayCastCanvas::raycasting("Alpha blending"); };
     m_modes["MIP"] = [&]() { RayCastCanvas::raycasting("MIP"); };
+
+    QTimer *timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(update()));
+    timer->start(10);
 }
 
 
@@ -107,11 +111,16 @@ void RayCastCanvas::paintGL()
     m_viewMatrix.translate(0, 0, -4.0f * std::exp(m_distExp / 600.0f));
     m_viewMatrix.rotate(m_trackBall.rotation());
 
+    m_raycasting_volume->rot = m_raycasting_volume->rot + 1.0f;
+    if (m_raycasting_volume->rot > 360.f)
+        m_raycasting_volume->rot = 0.f;
+    m_modelMatrix = m_raycasting_volume->modelMatrix();
+
     m_modelViewProjectionMatrix.setToIdentity();
     m_modelViewProjectionMatrix.perspective(m_fov, (float)scaled_width()/scaled_height(), 0.1f, 100.0f);
-    m_modelViewProjectionMatrix *= m_viewMatrix * m_raycasting_volume->modelMatrix();
+    m_modelViewProjectionMatrix *= m_viewMatrix * m_modelMatrix;
 
-    m_normalMatrix = (m_viewMatrix * m_raycasting_volume->modelMatrix()).normalMatrix();
+    m_normalMatrix = (m_viewMatrix * m_modelMatrix).normalMatrix();
 
     m_rayOrigin = m_viewMatrix.inverted() * QVector3D({0.0, 0.0, 0.0});
 
@@ -146,6 +155,7 @@ void RayCastCanvas::raycasting(const QString& shader)
     m_shaders[shader]->bind();
     {
         m_shaders[shader]->setUniformValue("ViewMatrix", m_viewMatrix);
+        m_shaders[shader]->setUniformValue("ModelMatrix", m_modelMatrix);
         m_shaders[shader]->setUniformValue("ModelViewProjectionMatrix", m_modelViewProjectionMatrix);
         m_shaders[shader]->setUniformValue("NormalMatrix", m_normalMatrix);
         m_shaders[shader]->setUniformValue("aspect_ratio", m_aspectRatio);

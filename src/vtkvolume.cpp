@@ -24,6 +24,7 @@
 #include <fstream>
 #include <cstdio>
 #include <cstring>
+#include <limits>
 #include <vector>
 #include <string>
 #include <limits>

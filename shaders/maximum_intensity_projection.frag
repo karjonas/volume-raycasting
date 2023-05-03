@@ -117,9 +117,10 @@ void main()
     vec3 position = ray_start;
 
     float maximum_intensity = 0.0;
+    int limit = 0;
 
     // Ray march until reaching the end of the volume
-    while (ray_length > 0) {
+    while (ray_length > 0 && limit < 256) {
 
         float intensity = texture(volume, position).r;
 
@@ -129,6 +130,7 @@ void main()
 
         ray_length -= step_length;
         position += step_vector;
+        limit += 1;
     }
 
     vec4 colour = colour_transfer(maximum_intensity);

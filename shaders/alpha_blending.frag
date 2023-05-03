@@ -25,6 +25,7 @@
 out vec4 a_colour;
 
 uniform mat4 ViewMatrix;
+uniform mat4 ModelMatrix;
 uniform mat3 NormalMatrix;
 
 uniform float focal_length;
@@ -99,13 +100,19 @@ void main()
     ray_direction.z = -focal_length;
     ray_direction = (vec4(ray_direction, 0) * ViewMatrix).xyz;
 
+    vec3 ray_direction_adjusted = (vec4(ray_direction, 0) * ModelMatrix).xyz;
+    vec3 ray_origin_adjusted = (vec4(ray_origin, 0) * ModelMatrix).xyz;
+
+    //vec3 ray_direction_adjusted = ray_direction;
+    //vec3 ray_origin_adjusted = ray_origin;
+
     float t_0, t_1;
-    Ray casting_ray = Ray(ray_origin, ray_direction);
+    Ray casting_ray = Ray(ray_origin_adjusted, ray_direction_adjusted);
     AABB bounding_box = AABB(top, bottom);
     ray_box_intersection(casting_ray, bounding_box, t_0, t_1);
 
-    vec3 ray_start = (ray_origin + ray_direction * t_0 - bottom) / (top - bottom);
-    vec3 ray_stop = (ray_origin + ray_direction * t_1 - bottom) / (top - bottom);
+    vec3 ray_start = (ray_origin_adjusted + ray_direction_adjusted * t_0 - bottom) / (top - bottom);
+    vec3 ray_stop = (ray_origin_adjusted + ray_direction_adjusted * t_1 - bottom) / (top - bottom);
 
     vec3 ray = ray_stop - ray_start;
     float ray_length = length(ray);
@@ -115,10 +122,11 @@ void main()
     ray_start += step_vector * texture(jitter, gl_FragCoord.xy / viewport_size).r;
 
     vec3 position = ray_start;
-    vec4 colour = vec4(0.0);
+    vec4 colour = vec4(0);
 
     // Ray march until reaching the end of the volume, or colour saturation
-    while (ray_length > 0 && colour.a < 1.0) {
+    int limit = 0;
+    while (ray_length > 0 && colour.a < 1.0 && limit < 256) {
 
         float intensity = texture(volume, position).r;
 
@@ -130,6 +138,7 @@ void main()
 
         ray_length -= step_length;
         position += step_vector;
+        limit += 1;
     }
 
     // Blend background
@@ -138,5 +147,6 @@ void main()
 
     // Gamma correction
     a_colour.rgb = pow(colour.rgb, vec3(1.0 / gamma));
+    a_colour.rgb += vec3(0.3, 0.2, 0.3);
     a_colour.a = colour.a;
 }

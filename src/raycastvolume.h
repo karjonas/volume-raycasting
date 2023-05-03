@@ -42,6 +42,8 @@ public:
     void paint(void);
     std::pair<double, double> range(void);
 
+    float rot = 0.f;
+
 
     /*!
      * \brief Get the extent of the volume.
@@ -68,7 +70,9 @@ public:
         if (shift) {
             modelMatrix.translate(-m_origin / scale_factor());
         }
-        modelMatrix.scale(0.5f * extent());
+
+        modelMatrix.rotate(rot, QVector3D(1,0,0));
+        //modelMatrix.scale(0.5f * extent());
         return modelMatrix;
     }
 

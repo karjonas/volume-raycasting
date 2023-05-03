@@ -105,6 +105,7 @@ protected:
 private:
 
     QMatrix4x4 m_viewMatrix;
+    QMatrix4x4 m_modelMatrix;
     QMatrix4x4 m_modelViewProjectionMatrix;
     QMatrix3x3 m_normalMatrix;
 

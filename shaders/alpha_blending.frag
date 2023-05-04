@@ -27,6 +27,7 @@ out vec4 a_colour;
 uniform mat4 ViewMatrix;
 uniform mat4 ViewMatrixInverse;
 uniform mat4 ProjectionMatrixInverse;
+uniform mat4 ModelMatrix;
 uniform mat3 NormalMatrix;
 
 uniform float focal_length;
@@ -145,10 +146,15 @@ void main()
     float t_0, t_1;
     Ray casting_ray = Ray(ray_origin, ray_direction);
 
-    AABB bounding_box = AABB(top, bottom);
+    vec3 top1 = (ModelMatrix * vec3(1, 1, 1)).xyz;
+    vec3 bottom1 = (ModelMatrix * vec3(-1, -1, -1)).xyz;
+
+    AABB bounding_box = AABB(top1, bottom1);
     ray_box_intersection(casting_ray, bounding_box, t_0, t_1);
 //    t_0 = 0;
 //    t_1 = 1;
+
+
 
     vec3 ray_start = (ray_origin + ray_direction * t_0 - bottom) / (top - bottom);
     vec3 ray_stop = (ray_origin + ray_direction * t_1 - bottom) / (top - bottom);

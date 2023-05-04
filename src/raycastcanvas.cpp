@@ -102,6 +102,10 @@ void RayCastCanvas::resizeGL(int w, int h)
  */
 void RayCastCanvas::paintGL()
 {
+    m_raycasting_volume->rot = m_raycasting_volume->rot + 1.0f;
+    if (m_raycasting_volume->rot > 360.f)
+        m_raycasting_volume->rot = 0.f;
+
     // Compute geometry
     m_viewMatrix.setToIdentity();
     m_viewMatrix.translate(0, 0, -4.0f * std::exp(m_distExp / 600.0f));
@@ -118,10 +122,6 @@ void RayCastCanvas::paintGL()
 
     // Perform raycasting
     m_modes[m_active_mode]();
-
-    m_raycasting_volume->rot = m_raycasting_volume->rot + 1.0f;
-    if (m_raycasting_volume->rot > 360.f)
-        m_raycasting_volume->rot = 0.f;
 }
 
 
@@ -154,6 +154,7 @@ void RayCastCanvas::raycasting(const QString& shader)
         m_shaders[shader]->setUniformValue("ViewMatrixInverse", m_viewMatrix.inverted());
         m_shaders[shader]->setUniformValue("ProjectionMatrixInverse", m_projectionMatrix.inverted());
         m_shaders[shader]->setUniformValue("ModelViewProjectionMatrix", m_modelViewProjectionMatrix);
+        m_shaders[shader]->setUniformValue("ModelMatrix", m_raycasting_volume->modelMatrix());
         m_shaders[shader]->setUniformValue("NormalMatrix", m_normalMatrix);
         m_shaders[shader]->setUniformValue("aspect_ratio", m_aspectRatio);
         m_shaders[shader]->setUniformValue("focal_length", m_focalLength);

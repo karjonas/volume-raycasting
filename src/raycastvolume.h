@@ -70,8 +70,8 @@ public:
         if (shift) {
             modelMatrix.translate(-m_origin / scale_factor());
         }
-        modelMatrix.rotate(rot, QVector3D(1,0,0));
         modelMatrix.scale(0.5f * extent());
+        modelMatrix.rotate(rot, QVector3D(1,0,0));
         return modelMatrix;
     }
 
@@ -81,6 +81,7 @@ public:
      * \return A vector holding the intercept of the top plane for each axis.
      */
     QVector3D top(bool shift = false) {
+        return modelMatrix() * (extent()*0.5f);
         auto t = extent() / 2.0;
         if (shift) {
             t -= m_origin / scale_factor();
@@ -94,6 +95,7 @@ public:
      * \return A vector holding the intercept of the bottom plane for each axis.
      */
     QVector3D bottom(bool shift = false) {
+        return modelMatrix() * (-extent()*0.5f);
         auto b = -extent() / 2.0;
         if (shift) {
             b -= m_origin / scale_factor();

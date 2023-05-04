@@ -25,6 +25,8 @@
 out vec4 a_colour;
 
 uniform mat4 ViewMatrix;
+uniform mat4 ViewMatrixInverse;
+uniform mat4 ProjectionMatrixInverse;
 uniform mat3 NormalMatrix;
 
 uniform float focal_length;
@@ -94,15 +96,59 @@ vec4 colour_transfer(float intensity)
 void main()
 {
     vec3 ray_direction;
-    ray_direction.xy = 2.0 * gl_FragCoord.xy / viewport_size - 1.0;
-    ray_direction.x *= aspect_ratio;
-    ray_direction.z = -focal_length;
-    ray_direction = (vec4(ray_direction, 0) * ViewMatrix).xyz;
+    // (0, 0) for center of screen, (1, 1) for upper right, (-1, -1) lower left
+    ray_direction.xy = 2.0 * gl_FragCoord.xy / viewport_size - vec2(1.0, 1.0);
+    //ray_direction.x *= aspect_ratio;
+
+    if (false) {
+        if (ray_direction.x < 0.0)
+            ray_direction.x = -ray_direction.x;
+
+        if (ray_direction.y < 0.0)
+            ray_direction.y = -ray_direction.y;
+
+        a_colour = vec4(ray_direction.x, 0, ray_direction.y, 1);
+        return;
+    }
+
+    vec3 ray_wor;
+
+    if (true)
+    {
+        vec4 ray_clip = vec4(ray_direction.xy, -1.0, 1.0);
+        vec4 ray_eye = ProjectionMatrixInverse * ray_clip;
+        ray_eye = vec4(ray_eye.xy, -1.0, 0.0);
+        ray_wor = (ViewMatrixInverse * ray_eye).xyz;
+        // don't forget to normalise the vector at some point
+        ray_wor = normalize(ray_wor);
+
+        a_colour = vec4(ray_wor, 1);
+        ray_direction = ray_wor;
+        //return;
+    }
+
+    //ray_direction.z = -focal_length;
+    //ray_direction = (vec4(ray_direction, 0) * ViewMatrix).xyz;
+
+    if (false)
+    {
+        a_colour = vec4(ray_direction - ray_wor, 1);
+        return;
+    }
+
+    if (false)
+    {
+        a_colour = vec4(ray_direction, 1);
+        return;
+    }
 
     float t_0, t_1;
     Ray casting_ray = Ray(ray_origin, ray_direction);
+
     AABB bounding_box = AABB(top, bottom);
     ray_box_intersection(casting_ray, bounding_box, t_0, t_1);
+//    t_0 = 0;
+//    t_1 = 1;
 
     vec3 ray_start = (ray_origin + ray_direction * t_0 - bottom) / (top - bottom);
     vec3 ray_stop = (ray_origin + ray_direction * t_1 - bottom) / (top - bottom);
@@ -119,8 +165,10 @@ void main()
     colour = vec4(0.3, 0, 0, 0.3);
 
 
+    int limit = 0;
+
     // Ray march until reaching the end of the volume, or colour saturation
-    while (ray_length > 0 && colour.a < 1.0) {
+    while (ray_length > 0 && colour.a < 1.0 && limit < 1000) {
 
         float intensity = texture(volume, position).r;
 
@@ -132,6 +180,7 @@ void main()
 
         ray_length -= step_length;
         position += step_vector;
+        limit += 1;
     }
 
     // Blend background

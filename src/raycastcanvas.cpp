@@ -109,6 +109,7 @@ void RayCastCanvas::paintGL()
 
     m_modelViewProjectionMatrix.setToIdentity();
     m_modelViewProjectionMatrix.perspective(m_fov, (float)scaled_width()/scaled_height(), 0.1f, 100.0f);
+    m_projectionMatrix = m_modelViewProjectionMatrix;
     m_modelViewProjectionMatrix *= m_viewMatrix * m_raycasting_volume->modelMatrix();
 
     m_normalMatrix = (m_viewMatrix * m_raycasting_volume->modelMatrix()).normalMatrix();
@@ -150,6 +151,8 @@ void RayCastCanvas::raycasting(const QString& shader)
     m_shaders[shader]->bind();
     {
         m_shaders[shader]->setUniformValue("ViewMatrix", m_viewMatrix);
+        m_shaders[shader]->setUniformValue("ViewMatrixInverse", m_viewMatrix.inverted());
+        m_shaders[shader]->setUniformValue("ProjectionMatrixInverse", m_projectionMatrix.inverted());
         m_shaders[shader]->setUniformValue("ModelViewProjectionMatrix", m_modelViewProjectionMatrix);
         m_shaders[shader]->setUniformValue("NormalMatrix", m_normalMatrix);
         m_shaders[shader]->setUniformValue("aspect_ratio", m_aspectRatio);

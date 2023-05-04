@@ -72,7 +72,7 @@ public:
         }
 
         modelMatrix.rotate(rot, QVector3D(1,0,0));
-        //modelMatrix.scale(0.5f * extent());
+        modelMatrix.scale(0.5f * extent());
         return modelMatrix;
     }
 

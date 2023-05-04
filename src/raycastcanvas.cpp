@@ -117,6 +117,10 @@ void RayCastCanvas::paintGL()
 
     // Perform raycasting
     m_modes[m_active_mode]();
+
+    m_raycasting_volume->rot = m_raycasting_volume->rot + 1.0f;
+    if (m_raycasting_volume->rot > 360.f)
+        m_raycasting_volume->rot = 0.f;
 }
 
 

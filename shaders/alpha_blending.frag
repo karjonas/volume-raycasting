@@ -118,7 +118,9 @@ void main()
     vec4 colour = vec4(0.0);
 
     // Ray march until reaching the end of the volume, or colour saturation
-    while (ray_length > 0 && colour.a < 1.0) {
+    int limit = 0;
+    while (ray_length > 0 && colour.a < 1.0 && limit < 1000) {
+        limit += 1;
 
         float intensity = texture(volume, position).r;
 

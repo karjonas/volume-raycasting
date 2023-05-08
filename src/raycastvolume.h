@@ -41,6 +41,8 @@ public:
     void create_noise(void);
     void paint(void);
     std::pair<double, double> range(void);
+    
+    float rot = 0.f;
 
 
     /*!
@@ -68,6 +70,7 @@ public:
         if (shift) {
             modelMatrix.translate(-m_origin / scale_factor());
         }
+        modelMatrix.rotate(rot, QVector3D(1, 1, 0));
         modelMatrix.scale(0.5f * extent());
         return modelMatrix;
     }

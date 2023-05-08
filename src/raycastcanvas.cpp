@@ -51,6 +51,10 @@ RayCastCanvas::RayCastCanvas(QWidget *parent)
     m_modes["Isosurface"] = [&]() { RayCastCanvas::raycasting("Isosurface"); };
     m_modes["Alpha blending"] = [&]() { RayCastCanvas::raycasting("Alpha blending"); };
     m_modes["MIP"] = [&]() { RayCastCanvas::raycasting("MIP"); };
+    
+    QTimer *timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(update()));
+    timer->start(10);
 }
 
 
@@ -119,6 +123,10 @@ void RayCastCanvas::paintGL()
 
     // Perform raycasting
     m_modes[m_active_mode]();
+    
+    m_raycasting_volume->rot += 1.0f;
+    if (m_raycasting_volume->rot > 360.f)
+        m_raycasting_volume->rot = 0.f;    
 }
 
 

@@ -25,6 +25,8 @@
 out vec4 a_colour;
 
 uniform mat4 ViewMatrix;
+uniform mat4 ModelMatrix;
+uniform mat4 ModelMatrixInverse;
 uniform mat3 NormalMatrix;
 
 uniform float focal_length;

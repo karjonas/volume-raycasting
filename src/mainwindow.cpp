@@ -47,6 +47,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Enable file drop
     setAcceptDrops(true);
+    
+    QTimer::singleShot(200, this, [&](){
+        load_volume("/home/jonas/Downloads/foot.vtk");
+    });
 }
 
 MainWindow::~MainWindow()

@@ -33,8 +33,8 @@ uniform float focal_length;
 uniform float aspect_ratio;
 uniform vec2 viewport_size;
 uniform vec3 ray_origin;
-uniform vec3 top;
-uniform vec3 bottom;
+//uniform vec3 top;
+//uniform vec3 bottom;
 
 uniform vec3 background_colour;
 uniform vec3 material_colour;
@@ -100,9 +100,25 @@ void main()
     ray_direction.x *= aspect_ratio;
     ray_direction.z = -focal_length;
     ray_direction = (vec4(ray_direction, 0) * ViewMatrix).xyz;
+    
+    vec4 ray_direction_world = ModelMatrixInverse * vec4(ray_direction, 1);     
+    vec4 ray_origin_world = ModelMatrixInverse * vec4(ray_origin, 1);
+    
+    ray_direction = ray_direction_world.xyz;
+    vec3 ray_origin = ray_origin_world.xyz;
 
     float t_0, t_1;
     Ray casting_ray = Ray(ray_origin, ray_direction);
+    
+    vec4 top1 = (ModelMatrix * vec4(1, 1, 1, 1));
+    vec4 bottom1 = (ModelMatrix * vec4(-1, -1, -1, 1));    
+    
+    vec3 top = top1.xyz;    
+    vec3 bottom = bottom1.xyz;
+    
+    top = vec3(1,1,1);
+    bottom = vec3(-1,-1,-1);
+
     AABB bounding_box = AABB(top, bottom);
     ray_box_intersection(casting_ray, bounding_box, t_0, t_1);
 

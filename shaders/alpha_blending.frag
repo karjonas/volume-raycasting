@@ -20,7 +20,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#version 130
+#version 140
 
 out vec4 a_colour;
 
@@ -60,16 +60,6 @@ struct AABB {
     vec3 bottom;
 };
 
-// Estimate normal from a finite difference approximation of the gradient
-vec3 normal(vec3 position, float intensity)
-{
-    float d = step_length;
-    float dx = texture(volume, position + vec3(d,0,0)).r - intensity;
-    float dy = texture(volume, position + vec3(0,d,0)).r - intensity;
-    float dz = texture(volume, position + vec3(0,0,d)).r - intensity;
-    return -normalize(NormalMatrix * vec3(dx, dy, dz));
-}
-
 // Slab method for ray-box intersection
 void ray_box_intersection(Ray ray, AABB box, out float t_0, out float t_1)
 {
@@ -97,15 +87,22 @@ void main()
 {
     vec3 ray_direction;
     ray_direction.xy = 2.0 * gl_FragCoord.xy / viewport_size - 1.0;
+    float aspect_ratio = viewport_size.x / viewport_size.y;
     ray_direction.x *= aspect_ratio;
     ray_direction.z = -focal_length;
-    ray_direction = (vec4(ray_direction, 0) * ViewMatrix).xyz;
+    mat4 ViewMatrixTranspose = transpose(ViewMatrix);
+    ray_direction = (ViewMatrixTranspose * vec4(ray_direction, 0)).xyz;
+
+    mat4 ViewMatrixInverse = inverse(ViewMatrix);
+    vec3 ray_origin = (ViewMatrixInverse * vec4(0,0,0,1)).xyz;
+
+    mat4 ModelMatrixInverse = inverse(ModelMatrix);
     
-    vec4 ray_direction_world = ModelMatrixInverse * vec4(ray_direction, 1);     
+    vec4 ray_direction_world = ModelMatrixInverse * vec4(ray_direction, 1);
     vec4 ray_origin_world = ModelMatrixInverse * vec4(ray_origin, 1);
     
     ray_direction = ray_direction_world.xyz;
-    vec3 ray_origin = ray_origin_world.xyz;
+    ray_origin = ray_origin_world.xyz;
 
     float t_0, t_1;
     Ray casting_ray = Ray(ray_origin, ray_direction);
@@ -121,10 +118,8 @@ void main()
 
     vec3 ray = ray_stop - ray_start;
     float ray_length = length(ray);
+    float step_length = 2.0/256.0;
     vec3 step_vector = step_length * ray / ray_length;
-
-    // Random jitter
-    ray_start += step_vector * texture(jitter, gl_FragCoord.xy / viewport_size).r;
 
     vec3 position = ray_start;
     vec4 colour = vec4(0.0);
@@ -146,11 +141,5 @@ void main()
         position += step_vector;
     }
 
-    // Blend background
-    colour.rgb = colour.a * colour.rgb + (1 - colour.a) * pow(background_colour, vec3(gamma)).rgb;
-    colour.a = 1.0;
-
-    // Gamma correction
-    a_colour.rgb = pow(colour.rgb, vec3(1.0 / gamma));
-    a_colour.a = colour.a;
+    a_colour = colour;
 }

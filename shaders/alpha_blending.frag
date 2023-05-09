@@ -109,15 +109,9 @@ void main()
 
     float t_0, t_1;
     Ray casting_ray = Ray(ray_origin, ray_direction);
-    
-    vec4 top1 = (ModelMatrix * vec4(1, 1, 1, 1));
-    vec4 bottom1 = (ModelMatrix * vec4(-1, -1, -1, 1));    
-    
-    vec3 top = top1.xyz;    
-    vec3 bottom = bottom1.xyz;
-    
-    top = vec3(1,1,1);
-    bottom = vec3(-1,-1,-1);
+
+    vec3 top = vec3(1,1,1);
+    vec3 bottom = vec3(-1,-1,-1);
 
     AABB bounding_box = AABB(top, bottom);
     ray_box_intersection(casting_ray, bounding_box, t_0, t_1);

@@ -110,7 +110,7 @@ private:
     QMatrix3x3 m_normalMatrix;
 
     const GLfloat m_fov = 60.0f;                                          /*!< Vertical field of view. */
-    const GLfloat m_focalLength = 1.0 / qTan(M_PI / 180.0 * m_fov / 2.0); /*!< Focal length. */
+    const GLfloat m_focalLength = 1.0 / qTan(M_PI * m_fov / 360.0);       /*!< Focal length. */
     GLfloat m_aspectRatio;                                                /*!< width / height */
 
     QVector2D m_viewportSize;

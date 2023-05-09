@@ -156,6 +156,7 @@ void RayCastCanvas::raycasting(const QString& shader)
     m_shaders[shader]->bind();
     {
         m_shaders[shader]->setUniformValue("ViewMatrix", m_viewMatrix);
+        m_shaders[shader]->setUniformValue("ViewMatrixInverse", m_viewMatrix.inverted());
         m_shaders[shader]->setUniformValue("ModelMatrix", m_modelMatrix);
         m_shaders[shader]->setUniformValue("ModelMatrixInverse", m_modelMatrix.inverted());
         m_shaders[shader]->setUniformValue("ModelViewProjectionMatrix", m_modelViewProjectionMatrix);
